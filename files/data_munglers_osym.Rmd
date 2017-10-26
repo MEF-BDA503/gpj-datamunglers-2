@@ -1,0 +1,169 @@
+---
+title: "OSYM-Dataset"
+author: "dataMunglers"
+date: "24 October 2017"
+output:
+  html_document:
+    theme: united
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+
+```{r eval=TRUE,echo=FALSE,include=FALSE}
+
+
+
+download.file("https://mef-bda503.github.io/files/osym_data_2017.RData", 
+              "osym_data_2017.RData")
+# Install tidyverse if not already installed
+if (!("tidyverse" %in% installed.packages())) {
+  install.packages("tidyverse", repos = "https://cran.r-project.org")
+}
+# Load tidyverse package
+library(tidyverse)
+# Load the data
+load("osym_data_2017.RData")
+
+osym<-osym_data_2017
+
+
+glimpse(osym)
+
+library(dplyr)
+library(ggplot2)
+```
+### OSYM Dataset -2017
+[The dataset](https://mef-bda503.github.io/files/osym_data_2017.RData) used in this analysis is the university entrance examinations (YGS/LYS) data from 2017. Dataset has 11031 observations and 14 variables.
+
+### Variables
++ ***university_name:*** Name of universities.
++ ***city:*** the city where university is located.
++ ***faculty_name:*** faculty names of universities.
++ ***program_name:*** program names of faculties.
++ ***exam_type:*** exam type of the university entrance examinations to be accepted into programmes.
++ ***general_qouta:*** is the quota for all students.
++ ***general_placement:***  is the number of placement for all students.
++ ***min_score:*** minimum score of the student who attempt to this program on last order according to exam_typeof program. If a program's placement is 0 min score is updated to 180.
++ ***max_score:*** maximum score of the student who attempt to this program on first order according to exam_typeof program. . If a program's placement is 0 min score is updated to 180.
++ ***val_*** is the same but only for valedictorians.
+
+*************
+
+###Initial Exploratory Analysis
+
+#### 1. look at mean,median and IQRs for OSYM dataset
+
+```{r}
+
+osym_summary<-osym%>%#filter(city="ÝSTANBUL")%>%
+  group_by(city,university_name,exam_type)%>%
+  summarise(max_puan=round(max(max_score),2),
+            min_puan=round(min(min_score),2),
+            diff=round(max_puan-min_puan,2),
+            avg_max=round(mean(max_score),2),
+            avg_min=round(mean(min_score),2),
+            median_max=round(median(max_score),2),
+            median_min=round(median(max_score),2),
+            IQR1_max=round(IQR(max_score,1),2),
+            IQR1_min=round(IQR(min_score,1),2),
+            IQR3_max=round(IQR(max_score,3),2),
+            IQR3_min=round(IQR(min_score,3),2)
+  )
+
+```
+
+* You can see the Mef University's rankings according to mean and median of exam types among all universities in Turkey. 
+
+
+```{r}
+
+osym_summary %>% 
+  select(exam_type,median_min)%>% 
+  arrange(exam_type,desc(median_min)) %>% 
+  ungroup %>% 
+  group_by(exam_type) %>% 
+  mutate(order_of_mef=row_number()) %>% 
+  filter(grepl("MEF ",university_name))
+
+
+
+osym_summary %>% 
+  select(exam_type,avg_min)%>% 
+  arrange(exam_type,desc(avg_min)) %>% 
+  ungroup %>% 
+  group_by(exam_type) %>% 
+  mutate(order_of_mef=row_number()) %>% 
+  filter(grepl("MEF ",university_name))
+
+```
+* Graph of rankings according to median
+
+```{r}
+
+plot_median<-osym_summary %>% 
+  select(exam_type,median_min)%>% 
+  arrange(exam_type,desc(median_min)) %>% 
+  ungroup %>% 
+  group_by(exam_type) %>% 
+  mutate(order_of_mef=row_number()) %>% 
+  filter(grepl("MEF ",university_name))
+
+ggplot(plot_median,aes(x=exam_type,y=order_of_mef,size=median_min))+
+  geom_point(stat="identity",color="purple") +theme_grey()
+
+```
+* Graph of rankings according to mean
+
+```{r}
+
+plot_mean<-osym_summary %>% 
+  select(exam_type,avg_min)%>% 
+  arrange(exam_type,desc(avg_min)) %>% 
+  ungroup %>% 
+  group_by(exam_type) %>% 
+  mutate(order_of_mef=row_number()) %>% 
+  filter(grepl("MEF ",university_name))
+
+ggplot(plot_mean,aes(x=exam_type,y=order_of_mef,size=avg_min))+
+  geom_point(stat="identity",color="darkred") +theme_grey()
+
+
+```
+
+#### 2. Looking At Programmes of MEF University
+
+ + Find the top 10 program at MEF University according to max_score. 
+
+```{r}
+osym_data_2017<-osym
+ist.uni<-osym_data_2017 %>% filter(grepl("STANBUL",city))
+mef.uni<-ist.uni %>% filter(grepl("MEF",university_name))
+mef.uni.top_10 <- mef.uni %>% group_by(program_name) %>% summarise(max_max_score=max(max_score)) %>% top_n(10)
+ggplot(mef.uni.top_10,aes(x=program_name,y=max_max_score)) + geom_bar(stat="identity",fill="tomato",width = 0.9) + theme_minimal() +  coord_flip() +theme(axis.text = element_text(angle = 15)) + xlab("Programmes") + ylab("Max_Score") + ggtitle("MEF UNIVERSITY TOP 10 PROGRAM")
+
+```
+
++ So, we can say "Hukuk (Tam Burslu)" program of MEF University has the max score on exam. We should glance at other universities which has "Hukuk (Tam Burslu)" program to check which of them are MEF University's competitors in the undergraduate market.
+```{r,echo=FALSE,results="hide",include=FALSE}
+mef.uni.top_10%>%arrange(max_max_score)
+#en yüksek puanli bölümü al
+mef.uni.top.1 <-mef.uni.top_10%>%arrange(max_max_score)%>%top_n(1)%>%select(program_name)
+#bu bölüme sahip istanbuldaki üniler  ## bunu parametreyle yapamadim ... :( filter'a parametre verme.?
+ist.uni.hukuk <- ist.uni %>% filter(program_name=="Hukuk (Tam Burslu)")
+```
+
+
+```{r}
+orderedhukuk<-ist.uni.hukuk%>%arrange(max_score)
+orderedhukuk%>%select(university_name,max_score)
+set.seed(2)
+ggplot(orderedhukuk,aes(x=reorder(university_name,max_score),y=max_score,label=max_score)) + geom_bar(stat="identity",fill="darkblue",width = 0.6)  +  coord_flip() + theme_minimal()   +  scale_y_continuous(limits = c(0,600)) + xlab("Max Score") + ylab("University") + ggtitle("Hukuk (Tam Burslu) Program In Universities") 
+
+```
+
