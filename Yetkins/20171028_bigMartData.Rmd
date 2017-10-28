@@ -1,0 +1,254 @@
+---
+title: "bigMartSalesData"
+author: "dataMunglers"
+date: "28 October 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+* We take data from [analyticsvidhya.com](https://www.analyticsvidhya.com), Our data is [Big Mart Sales Practise Problem](https://datahack.analyticsvidhya.com/contest/practice-problem-big-mart-sales-iii/) Data, It is open comppetition now and its final date is 31 Dec 2017. We downloaded training dataset as a csv file. 
+
+```{r eval=TRUE,echo=FALSE,include=FALSE}
+
+setwd("C:/Users/yetkinEser/Desktop/R/datas")
+bigMart<-read.csv('bigMartTrain.csv')
+
+library(dplyr)
+library(ggplot2)
+
+```
+
+* View the structere of bigMart with __*str*__ function
+
+
+```{r}
+
+str(bigMart)
+
+```
+
+
+* Load dplyr package and look at data types with __*glimpse*__ function 
+
+```{r eval=TRUE,echo=FALSE,include=FALSE}
+
+library(dplyr)
+
+```
+
+```{r}
+
+glimpse(bigMart)
+
+```
+
+* Our dataset has 12 columns and 8523 rows
+Look at all columns, Firstly factor type columns
+
+  * *__Item_Identifier__* : Unique Product ID
+  
+```{r}
+
+bigMart%>%
+  summarise(n_distinct(Item_Identifier))
+  
+```
+
+  * *__Item_Fat_Content__* : Whether the product is low fat or not
+
+```{r}
+  
+bigMart%>%
+  group_by(Item_Fat_Content)%>%
+  summarise(Count=n(),Perc=round(n()/nrow(.)*100,2))%>%
+  arrange(desc(Count))
+  
+```
+  
+  * *__Item_Type__* : The category to which the product belongs
+
+```{r}
+  
+bigMart%>%
+  group_by(Item_Type)%>%
+  summarise(Count=n(),Perc=round(n()/nrow(.)*100,2))%>%
+  arrange(desc(Count))
+
+```
+  
+  * *__Outlet_Identifier__* : Unique Store ID
+
+```{r}
+  
+bigMart%>%
+  group_by(Outlet_Identifier)%>%
+  summarise(Count=n(),Perc=round(n()/nrow(.)*100,2))%>%
+  arrange(desc(Count))
+
+```
+  
+  * *__Outlet_Size__* : The size of the store in terms of ground area covered
+
+```{r}
+
+bigMart%>%
+  group_by(Outlet_Size)%>%
+  summarise(Count=n(),Perc=round(n()/nrow(.)*100,2))%>%
+  arrange(desc(Count))
+
+```
+
+  * *__Outlet_Location_Type__* : The type of city in which the store is located
+
+```{r}
+  
+bigMart%>%
+  group_by(Outlet_Location_Type)%>%
+  summarise(Count=n(),Perc=round(n()/nrow(.)*100,2))%>%
+  arrange(desc(Count))
+
+```
+  
+  * *__Outlet_Type__* : Whether the outlet is just a grocery store or some sort of supermarket
+
+```{r}
+  
+bigMart%>%
+  group_by(Outlet_Type)%>%
+  summarise(Count=n(),Perc=round(n()/nrow(.)*100,2))%>%
+  arrange(desc(Count))
+
+```
+    
+  * *__Item_Weight__* : Weight of product
+
+```{r}
+  
+bigMart%>%
+    summarise(is_NULL=sum(is.na(Item_Weight)==1),
+              is_NOT_NULL=sum(!is.na(Item_Weight)==1)
+              )
+  
+bigMart%>%
+  filter(!is.na(Item_Weight))%>%
+  summarise(
+    Max=max(Item_Weight),
+    Min=min(Item_Weight),
+    Mean=mean(Item_Weight),
+    Median=median(Item_Weight),
+    QUA1=quantile(Item_Weight,1/4),
+    QUA3=quantile(Item_Weight,3/4),
+    IQR=IQR(Item_Weight)
+  )
+  
+```
+    
+  * *__Item_Visibility__* : The % of total display area of all products in a store allocated to the particular product
+
+```{r}
+  
+bigMart%>%
+    summarise(is_NULL=sum(is.na(Item_Visibility)==1),
+              is_NOT_NULL=sum(!is.na(Item_Visibility)==1)
+              )
+  
+bigMart%>%
+  filter(!is.na(Item_Visibility))%>%
+  summarise(
+    Max=max(Item_Visibility),
+    Min=min(Item_Visibility),
+    Mean=mean(Item_Visibility),
+    Median=median(Item_Visibility),
+    QUA1=quantile(Item_Visibility,1/4),
+    QUA3=quantile(Item_Visibility,3/4),
+    IQR=IQR(Item_Visibility)
+  )
+  
+  
+```
+    
+  * *__Item_MRP__* : Maximum Retail Price (list price) of the product
+
+```{r}
+  
+bigMart%>%
+    summarise(is_NULL=sum(is.na(Item_MRP)==1),
+              is_NOT_NULL=sum(!is.na(Item_MRP)==1)
+              )
+  
+bigMart%>%
+  filter(!is.na(Item_MRP))%>%
+  summarise(
+    Max=max(Item_MRP),
+    Min=min(Item_MRP),
+    Mean=mean(Item_MRP),
+    Median=median(Item_MRP),
+    QUA1=quantile(Item_MRP,1/4),
+    QUA3=quantile(Item_MRP,3/4),
+    IQR=IQR(Item_MRP)
+  )
+    
+```
+  
+  * *__Outlet_Establishment_Year__* : The year in which store was established
+
+```{r}
+  
+bigMart%>%
+    summarise(is_NULL=sum(is.na(Outlet_Establishment_Year)==1),
+              is_NOT_NULL=sum(!is.na(Outlet_Establishment_Year)==1)
+              )
+  
+bigMart%>%
+  filter(!is.na(Outlet_Establishment_Year))%>%
+  summarise(
+    Max=max(Outlet_Establishment_Year),
+    Min=min(Outlet_Establishment_Year),
+    Mean=mean(Outlet_Establishment_Year),
+    Median=median(Outlet_Establishment_Year),
+    QUA1=quantile(Outlet_Establishment_Year,1/4),
+    QUA3=quantile(Outlet_Establishment_Year,3/4),
+    IQR=IQR(Outlet_Establishment_Year)
+  )
+  
+```
+    
+  * *__Item_Outlet_Sales__* : Sales of the product in the particulat store. This is the outcome variable to be predicted.
+
+```{r}
+
+bigMart%>%
+    summarise(is_NULL=sum(is.na(Item_Outlet_Sales)==1),
+              is_NOT_NULL=sum(!is.na(Item_Outlet_Sales)==1)
+              )
+  
+bigMart%>%
+  filter(!is.na(Item_Outlet_Sales))%>%
+  summarise(
+    Max=max(Item_Outlet_Sales),
+    Min=min(Item_Outlet_Sales),
+    Mean=mean(Item_Outlet_Sales),
+    Median=median(Item_Outlet_Sales),
+    QUA1=quantile(Item_Outlet_Sales,1/4),
+    QUA3=quantile(Item_Outlet_Sales,3/4),
+    IQR=IQR(Item_Outlet_Sales)
+  )
+  
+  
+```
+
+* Summary =)))
+
+```{r}
+
+summary(bigMart)
+
+```
+
+
+
+
