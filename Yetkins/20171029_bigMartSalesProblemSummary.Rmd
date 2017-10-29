@@ -1,0 +1,59 @@
+
+
+## <span style="color:grey">__*DataMunglers*__</span>
+  
+## Team Members
+  
+  * *__[Ahmet Yetkin Eser](https://www.linkedin.com/in/ahmet-yetkin-eser-04178a40/)__*
+  
+  * *__[Berkay Soyer](https://www.linkedin.com/in/berkaysoyer/)__*
+  
+  * *__[Feray Ece Topçu]()__*
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+  
+## Our Objective
+
+* The data scientists at BigMart have collected 2013 sales data for 1559 products across 10 stores in different cities. The main objective is to understand whether specific properties of products and/or stores play a significant role in terms of increasing or decreasing sales volume. To achieve this goal, we will build a predictive model and find out the sales of each product at a particular store. This will help BigMart to boost their sales by learning optimised product organization inside stores.
+
+## Data Getting 
+  
+* We take data from [analyticsvidhya.com](https://www.analyticsvidhya.com), Our data is [Big Mart Sales Practise Problem](https://datahack.analyticsvidhya.com/contest/practice-problem-big-mart-sales-iii/) Data, It is open comppetition now and its final date is 31 Dec 2017. We downloaded training dataset as a csv file. 
+
+## About BigMart
+
+*  Big Mart is One Stop Shopping center and Free Marketplace. Buy, sell and advertise without fee or at low cost. Find more information about BigMart [Here](http://www.bigmart.com/about-us.html). 
+
+## Inside to Data
+
+* We have train (8523) and test (5681) data set, train data set has both input and output variable(s).
+
+  * *__Item_Identifier__* : Unique Product ID
+  
+  * *__Item_Fat_Content__* : Whether the product is low fat or not
+
+  * *__Item_Type__* : The category to which the product belongs
+
+  * *__Outlet_Identifier__* : Unique Store ID
+
+  * *__Outlet_Size__* : The size of the store in terms of ground area covered
+
+  * *__Outlet_Location_Type__* : The type of city in which the store is located
+
+  * *__Outlet_Type__* : Whether the outlet is just a grocery store or some sort of supermarket
+
+  * *__Item_Weight__* : Weight of product
+
+  * *__Item_Visibility__* : The % of total display area of all products in a store allocated to the particular product
+
+  * *__Item_MRP__* : Maximum Retail Price (list price) of the product
+
+  * *__Outlet_Establishment_Year__* : The year in which store was established
+
+  * *__Item_Outlet_Sales__* : Sales of the product in the particular store. This is the outcome variable to be predicted.
+
+  __*Note:*__ You can find detailed data explanations [here](https://mef-bda503.github.io/gpj-datamunglers-2/Yetkins/20171028_bigMartSalesData_Columns_Rows_Detailed.html).
+
+  
