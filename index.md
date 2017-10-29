@@ -10,4 +10,7 @@
 ## 2. Step: Big Mart Sales Data Detailed Explanation (Oct 28)
 
  + [Here](Yetkins/20171028_bigMartSalesData_Columns_Rows_Detailed.html) is the detailed explanation of [Big Mart Sales Practise Problem](https://datahack.analyticsvidhya.com/contest/practice-problem-big-mart-sales-iii/) data columns and rows.
- + [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is our first proposal.
+
+## 3. Step: Project Aim and about data (Oct 29)
+
++ [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is our first proposal.
