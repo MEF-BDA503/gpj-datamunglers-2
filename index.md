@@ -5,7 +5,7 @@
  
 ## 3. Step: Project Aim and about data (Oct 29)
 
-+ [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is our first proposal.
++ [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is the our first proposal.
 
 ## 2. Step: Big Mart Sales Data Detailed Explanation (Oct 28)
 
@@ -13,6 +13,6 @@
 
 ## 1. Step: Case Study (Oct 24)
  
- + [Here](files/Data_Munglers_OSYMUTF8.html) is the result of the exploration of university entrance examinations (YGS/LYS) data from 2017..
+ + [Here](files/Data_Munglers_OSYMUTF8.html) is the result of the exploration of university entrance examinations (YGS/LYS) data from 2017.
 
 
