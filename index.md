@@ -3,15 +3,15 @@
  + __*[Feray Ece Topçu](https://mef-bda503.github.io/pj-ferayece/)*__
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
  
-## 3. Step: Project Aim and about data (Oct 29)
+## 3. Step: Project Aim and about data (Oct 29 2017)
 
 + [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is the our first proposal.
 
-## 2. Step: Big Mart Sales Data Detailed Explanation (Oct 28)
+## 2. Step: Big Mart Sales Data Detailed Explanation (Oct 28 2017)
 
  + [Here](Yetkins/20171028_bigMartSalesData_Columns_Rows_Detailed.html) is the detailed explanation of [Big Mart Sales Practise Problem](https://datahack.analyticsvidhya.com/contest/practice-problem-big-mart-sales-iii/) data columns and rows.
 
-## 1. Step: Case Study (Oct 24)
+## 1. Step: Case Study (Oct 24 2017)
  
  + [Here](files/Data_Munglers_OSYMUTF8.html) is the result of the exploration of university entrance examinations (YGS/LYS) data from 2017.
 
