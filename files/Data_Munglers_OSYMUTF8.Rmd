@@ -37,6 +37,7 @@ glimpse(osym)
 
 library(dplyr)
 library(ggplot2)
+library(gridExtra)
 ```
 ### OSYM Dataset -2017
 [The dataset](https://mef-bda503.github.io/files/osym_data_2017.RData) used in this analysis is the university entrance examinations (YGS/LYS) data from 2017. Dataset has 11031 observations and 14 variables.
@@ -57,11 +58,15 @@ library(ggplot2)
 
 ###Initial Exploratory Analysis
 
-#### 1. look at mean,median and IQRs for OSYM dataset
+  + The main aim of the analysis is discover some patterns about MEF University for gaining leverage on other competitors.
 
-```{r}
+#### 1. Looking at Scores of MEF University
 
-osym_summary<-osym%>%#filter(city="ÝSTANBUL")%>%
+  + Firstly; we should look at universities in Istanbul which can be strongly MEF Uni.'s competitors. So; filtered OSYM 2017 dataset as OSYM 2017-Istanbul dataset. After narrowing dataset; we wonder minimum score, maximum score, average score and IQR's of universities in Istanbul based on exam_type to gain a perspective where MEF is on this list.
+  
+```{r message=FALSE,warning=FALSE}
+
+osym_summary<-osym%>%filter(grepl("STANBUL",city))%>%
   group_by(city,university_name,exam_type)%>%
   summarise(max_puan=round(max(max_score),2),
             min_puan=round(min(min_score),2),
@@ -78,34 +83,34 @@ osym_summary<-osym%>%#filter(city="ÝSTANBUL")%>%
 
 ```
 
-* You can see the Mef University's rankings according to mean and median of exam types among all universities in Turkey. 
+```{r eval=TRUE,echo=FALSE,include=FALSE}
+osym_summary_MF_4 <- osym_summary %>% filter(exam_type=="MF_4")
+a<-osym_summary_MF_4 %>% select(university_name,avg_max)
+a<-osym_summary_MF_4 %>% filter(avg_max>=350)
+mf_4 <- ggplot(a,aes(avg_max,university_name)) + geom_point() +ggtitle("MF-4")
 
+osym_summary_MF_4 <- osym_summary %>% filter(exam_type=="MF_3")
+a<-osym_summary_MF_4 %>% select(university_name,avg_max)
+a<-osym_summary_MF_4 %>% filter(avg_max>=350)
+mf_3<- ggplot(a,aes(avg_max,university_name)) + geom_point() +ggtitle("MEF-3")
 
-```{r}
+osym_summary_MF_4 <- osym_summary %>% filter(exam_type=="TM_4")
+a<-osym_summary_MF_4 %>% select(university_name,avg_max)
+a<-osym_summary_MF_4 %>% filter(avg_max>=350)
+tm_4 <- ggplot(a,aes(avg_max,university_name)) + geom_point() +ggtitle("TM-4")
 
-osym_summary %>% 
-  select(exam_type,median_min)%>% 
-  arrange(exam_type,desc(median_min)) %>% 
-  ungroup %>% 
-  group_by(exam_type) %>% 
-  mutate(order_of_mef=row_number()) %>% 
-  filter(grepl("MEF ",university_name))
-
-
-
-osym_summary %>% 
-  select(exam_type,avg_min)%>% 
-  arrange(exam_type,desc(avg_min)) %>% 
-  ungroup %>% 
-  group_by(exam_type) %>% 
-  mutate(order_of_mef=row_number()) %>% 
-  filter(grepl("MEF ",university_name))
+osym_summary_MF_4 <- osym_summary %>% filter(exam_type=="TM_3")
+a<-osym_summary_MF_4 %>% select(university_name,avg_max)
+a<-osym_summary_MF_4 %>% filter(avg_max>=350)
+tm_3 <- ggplot(a,aes(avg_max,university_name)) + geom_point() +ggtitle("TM-3")
 
 ```
-* Graph of rankings according to median
+ 
++  For looking at where MEF is located in market, we should examine Min Score of different exam types. So, You can see the Mef University's rankings according to mean and median of min score (of different programmes) due to exam types among all universities in Turkey. 
 
-```{r}
 
+```{r message=FALSE,warning=FALSE}
+# Find te ordered list according to median of Min Score due to Exam Type
 plot_median<-osym_summary %>% 
   select(exam_type,median_min)%>% 
   arrange(exam_type,desc(median_min)) %>% 
@@ -114,14 +119,9 @@ plot_median<-osym_summary %>%
   mutate(order_of_mef=row_number()) %>% 
   filter(grepl("MEF ",university_name))
 
-ggplot(plot_median,aes(x=exam_type,y=order_of_mef,size=median_min))+
-  geom_point(stat="identity",color="purple") +theme_grey()
+plot_median
 
-```
-* Graph of rankings according to mean
-
-```{r}
-
+# Find te ordered list according to Average of Min Score due to Exam Type
 plot_mean<-osym_summary %>% 
   select(exam_type,avg_min)%>% 
   arrange(exam_type,desc(avg_min)) %>% 
@@ -130,26 +130,52 @@ plot_mean<-osym_summary %>%
   mutate(order_of_mef=row_number()) %>% 
   filter(grepl("MEF ",university_name))
 
-ggplot(plot_mean,aes(x=exam_type,y=order_of_mef,size=avg_min))+
-  geom_point(stat="identity",color="darkred") +theme_grey()
-
+plot_mean
 
 ```
 
++ Visualizing is better.
+
+```{r message=FALSE,warning=FALSE}
+
+
+g_median <- ggplot(plot_median,aes(x=exam_type,y=order_of_mef,size=median_min))+
+  geom_point(stat="identity",color="purple") + scale_y_continuous(limits = c(0,20)) + xlab("Order of MEF") + ylab("Exam Type") + 
+  ggtitle("According to Median  of Min Score") +
+  theme_minimal()
+
+
+g_mean <- ggplot(plot_mean,aes(x=exam_type,y=order_of_mef,size=avg_min))+
+  geom_point(stat="identity",color="darkred") +  scale_y_continuous(limits = c(0,20)) + xlab("Order of MEF") + ylab("Exam Type") +
+  ggtitle("According to Mean of Min Score ") +
+  theme_minimal()
+
+grid.arrange(g_median,g_mean,ncol=1)
+
+```
+
+ + So, we can easily said that MEF University is on Top 20 List based on all exam types. According to average of min score of all programmes, Exam type:DIL-1 has MEF Uni.'s most preferable programmes. So; university should focus on these programmes if the aim is to be winner on an exam type. On the other hand; Exam type: TM-1 has the worst order, it means programmes of TM-1 are not popular options for students, ergo; MEF Uni. should focus on these programmes on advertising strategy and introducing days of university.
+
 #### 2. Looking At Programmes of MEF University
 
- + Find the top 10 program at MEF University according to max_score. 
+ + Looking at programmes is important when MEF University wants to know their strongest program on market. So firstly; find the top 10 program at MEF University according to max_score. 
 
-```{r}
+```{r message=FALSE,warning=FALSE}
 osym_data_2017<-osym
 ist.uni<-osym_data_2017 %>% filter(grepl("STANBUL",city))
 mef.uni<-ist.uni %>% filter(grepl("MEF",university_name))
 mef.uni.top_10 <- mef.uni %>% group_by(program_name) %>% summarise(max_max_score=max(max_score)) %>% top_n(10)
-ggplot(mef.uni.top_10,aes(x=program_name,y=max_max_score)) + geom_bar(stat="identity",fill="tomato",width = 0.9) + theme_minimal() +  coord_flip() +theme(axis.text = element_text(angle = 15)) + xlab("Programmes") + ylab("Max_Score") + ggtitle("MEF UNIVERSITY TOP 10 PROGRAM")
+ggplot(mef.uni.top_10,aes(x=program_name,y=max_max_score)) + geom_bar(stat="identity",fill="tomato",width = 0.9) +scale_y_continuous(limits = c(0,500))+
+  theme_minimal() +  coord_flip() +theme(axis.text = element_text(angle = 15)) + xlab("Programmes") + ylab("Max Score") + ggtitle("MEF UNIVERSITY TOP 10 PROGRAM")
 
 ```
 
-+ So, we can say "Hukuk (Tam Burslu)" program of MEF University has the max score on exam. We should glance at other universities which has "Hukuk (Tam Burslu)" program to check which of them are MEF University's competitors in the undergraduate market.
+ + According to graph; it can be observed programmes with OSYM scholarship is the most popular programmes, especially if it is full scholarship. So; MEF University can expand scholarship quota of top 10 programmes to gain more student and take advantage on undergraduate market.
+ 
++ Another valuable point from graph is that "Hukuk (Tam Burslu)" program of MEF University has the max score on exam. We should glance at other universities which has "Hukuk (Tam Burslu)" program to check which of them are MEF University's competitors on this program in the undergraduate market.
+
+
+
 ```{r,echo=FALSE,results="hide",include=FALSE}
 mef.uni.top_10%>%arrange(max_max_score)
 #en yüksek puanlı bölümü al
@@ -159,11 +185,16 @@ ist.uni.hukuk <- ist.uni %>% filter(program_name=="Hukuk (Tam Burslu)")
 ```
 
 
-```{r}
-orderedhukuk<-ist.uni.hukuk%>%arrange(max_score)
+```{r message=FALSE,warning=FALSE}
+ist.uni.hukuk <- ist.uni %>% filter(program_name=="Hukuk (Tam Burslu)")
+orderedhukuk<-ist.uni.hukuk%>%arrange(desc(max_score))
 orderedhukuk%>%select(university_name,max_score)
+
+#Graph is better. 
 set.seed(2)
 ggplot(orderedhukuk,aes(x=reorder(university_name,max_score),y=max_score,label=max_score)) + geom_bar(stat="identity",fill="darkblue",width = 0.6)  +  coord_flip() + theme_minimal()   +  scale_y_continuous(limits = c(0,600)) + xlab("Max Score") + ylab("University") + ggtitle("Hukuk (Tam Burslu) Program In Universities") 
 
 ```
 
+
++ According to graph; MEF University has strong competitors on "Hukuk (Tam Burslu)" program while it is on top 20 List of this program. Even if it seems hard to be the most preferable university briefly, MEF University should focus on "Hukuk (Tam Burslu)" program on advertising strategy and introducing days of university to ranking up and take advantage on the undergraudate market.
