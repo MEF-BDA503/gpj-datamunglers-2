@@ -2,7 +2,11 @@
  + __*[Berkay Soyer](https://mef-bda503.github.io/pj-berkaysoyer/)*__
  + __*[Feray Ece Topcu](https://mef-bda503.github.io/pj-ferayece/)*__
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
- 
+
+## 4. Step: Try to Understand Data (05.11.2017)
+
++ [Here](Yetkins/20171105_BigMartSalesData_Udacity) is the some semi-analysis(will be edited).
+
 ## 3. Step: Project Aim and about data (29.10.2017)
 
 + [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is the our first proposal.
