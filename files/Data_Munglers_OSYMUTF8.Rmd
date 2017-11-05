@@ -192,7 +192,7 @@ orderedhukuk%>%select(university_name,max_score)
 
 #Graph is better. 
 set.seed(2)
-ggplot(orderedhukuk,aes(x=reorder(university_name,max_score),y=max_score,label=max_score)) + geom_bar(stat="identity",fill="darkblue",width = 0.6)  +  coord_flip() + theme_minimal()   +  scale_y_continuous(limits = c(0,600)) + xlab("Max Score") + ylab("University") + ggtitle("Hukuk (Tam Burslu) Program In Universities") 
+ggplot(orderedhukuk,aes(x=reorder(university_name,max_score),y=max_score,label=max_score)) + geom_bar(stat="identity",fill="darkblue",width = 0.6)  +  coord_flip() + theme_minimal()   +  scale_y_continuous(limits = c(0,600)) + xlab("University") + ylab("Max Score") + ggtitle("Hukuk (Tam Burslu) Program In Universities") 
 
 ```
 
