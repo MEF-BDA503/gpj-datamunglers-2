@@ -1,0 +1,334 @@
+---
+title: "20171105_BigMartSalesData_Udacity"
+author: "dataMunglers"
+date: "5 November 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Get Used to Big Mart Sales Data
+
+ * In this work we try to understand data better.
+ * sources:
+    * [Udacity Data Analysis with R](https://classroom.udacity.com/courses/ud651) Lesson 3 and 5
+    * [DataCamp - Cleaning Data with R](https://www.datacamp.com/courses/cleaning-data-in-r)
+    * [R Project-An Introduction to corrplot Package](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)
+ 
+```{r cars}
+
+setwd("C:/Users/yetkinEser/Desktop/R/datas")
+bigMart<-read.csv('bigMartTrain.csv')
+
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+
+bigMart2<-
+  bigMart%>%
+  mutate(Item_Identifier_Str=substr(Item_Identifier,1,3),
+         Item_Identifier_Num=as.numeric(substr(Item_Identifier,4,6)),
+         Outlet_Age=2013-Outlet_Establishment_Year,
+         Item_Fat_Fixed=str_replace(
+           str_replace(
+             str_replace(Item_Fat_Content,"LF","Low Fat")
+             ,"reg","Regular"),"low fat","Low Fat"),
+         Item_outlet_Sales_Count = Item_Outlet_Sales / Item_MRP,
+         PK=row_number())
+
+names(bigMart2)
+
+qplot(x=Item_Fat_Content,data=bigMart2)
+
+qplot(x=Item_Fat_Fixed,data=bigMart2)
+
+
+# Looking at Item Type
+qplot(x=Item_Type,data=bigMart2)+
+  geom_bar(color="green")+
+  theme(axis.text = element_text(angle = 0,color="purple"))+
+  coord_flip()
+
+# Looking at Item Type with facet wrap according to Outlet Identifier
+qplot(x=Item_Type,data=bigMart2)+
+  geom_bar(color="green")+
+  theme(axis.text = element_text(angle = 0,color="purple"))+
+  coord_flip()+
+  facet_wrap(~Outlet_Identifier,nrow=2)
+
+# Looking at Item Type with facet wrap according to Item_Identifier_Num
+qplot(x=Item_Type,data=bigMart2)+
+  geom_bar(color="green")+
+  theme(axis.text = element_text(angle = 0,color="purple"))+
+  coord_flip()+
+  facet_wrap(~Item_Identifier_Num,nrow=2)
+
+# Looking at Item Type with facet wrap according to Item_Identifier_Str
+qplot(x=Item_Type,data=bigMart2)+
+  geom_bar(color="green")+
+  theme(axis.text = element_text(angle = 90,color="purple"))+
+  coord_flip()+
+  facet_wrap(~Item_Identifier_Str,nrow=2)
+
+# Looking at Item_Outlet_Sales 
+qplot(x=Item_Outlet_Sales, data = bigMart2,binwidth = 250)+
+  geom_bar(color="green")+
+  theme(axis.text = element_text(angle = 90,color="purple"))+
+  scale_x_continuous(limits=c(0, 10000),breaks=seq(0, 10000, 500))
+  
+# Looking at Item_Outlet_Sales according to Outlet_Identifier
+qplot(x=Item_Outlet_Sales,data = bigMart2,binwidth = 250)+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(0,5000),breaks=seq(0,5000,500))+
+  scale_y_continuous(limits=c(0,250),breaks=seq(0,200,100))+
+  facet_wrap(~Outlet_Identifier,nrow=5)
+
+# Looking at Item_Outlet_Sales according to Outlet_Size
+qplot(x=Item_Outlet_Sales,data = bigMart2,binwidth = 250)+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(0,5000),breaks=seq(0,5000,500))+
+  scale_y_continuous(limits=c(0,250),breaks=seq(0,200,100))+
+  facet_wrap(~Outlet_Size,nrow=4)
+
+# Looking at Item_Outlet_Sales according to Outlet_Size with is.na function
+qplot(x=Item_Outlet_Sales,data = subset(bigMart2, !is.na(Outlet_Size)),binwidth = 250)+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(0,5000),breaks=seq(0,5000,500))+
+  scale_y_continuous(limits=c(0,250),breaks=seq(0,200,100))+
+  facet_wrap(~Outlet_Size,nrow=4)
+
+
+table(bigMart2$Outlet_Size)
+
+by(bigMart2$Item_Outlet_Sales,bigMart2$Outlet_Size,summary)
+
+
+# Looking at Item_Outlet_Sales according to Outlet_Size with is.na function
+# And giving name to y label
+qplot(x=Item_Outlet_Sales,data = subset(bigMart2, !is.na(Outlet_Size)),binwidth = 250,
+      ylab="Count Of Sales")+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(0,5000),breaks=seq(0,5000,500))+
+  scale_y_continuous(limits=c(0,250),breaks=seq(0,200,100))+
+  facet_wrap(~Outlet_Size,nrow=4)
+
+
+qplot(x=Item_Type,data=bigMart2,
+      ylab="Count Of Sales",color=I("black"),fill=I("#5760AB"))+
+  #geom_bar(color="green")+
+  theme(axis.text = element_text(angle = 0,color="purple"))+
+  coord_flip()
+
+# Look at summary with different wat
+
+summary(bigMart$Item_Outlet_Sales)
+
+summary(log10(bigMart$Item_Outlet_Sales+1))
+
+summary(sqrt(bigMart$Item_Outlet_Sales))
+
+
+# histogram with sqrt and log10
+qplot(x=Item_Outlet_Sales,data = subset(bigMart2, !is.na(Outlet_Size)),binwidth = 50,
+      ylab="Count Of Sales")+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(0,5000),breaks=seq(0,5000,250))+
+  scale_y_continuous(limits=c(0,250),breaks=seq(0,200,100))
+
+# It is better now like normal distibution with sqrt and log10
+qplot(x=sqrt(Item_Outlet_Sales),data = subset(bigMart2, !is.na(Outlet_Size)),binwidth = 1,
+      ylab="Count Of Sales",
+      xlab="SQRT of Outlet Sales")+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(0,100),breaks=seq(0,70,15))+
+  scale_y_continuous(limits=c(0,200),breaks=seq(0,200,100))
+
+qplot(x=log10(Item_Outlet_Sales+1),data = subset(bigMart2, !is.na(Outlet_Size)),binwidth = 0.01,
+      ylab="Count Of Sales",
+      xlab="LOG10 of Outlet Sales")+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(1.5,4.5),breaks=seq(1.5,4.5,0.5))+
+  scale_y_continuous(limits=c(0,200),breaks=seq(0,200,100))
+
+# it is bettew with scale_x_log10()
+qplot(x=Item_Outlet_Sales,data = subset(bigMart2, !is.na(Outlet_Size)),binwidth = 0.01,
+      ylab="Count Of Sales",
+      xlab="LOG10 of Outlet Sales")+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(1.5,4.5),breaks=seq(1.5,4.5,0.5))+
+  scale_y_continuous(limits=c(0,200),breaks=seq(0,200,100))+
+  scale_x_log10()
+
+# it is bettew with scale_x_log10()
+qplot(x=Item_Outlet_Sales,data = subset(bigMart2, !is.na(Outlet_Size)),binwidth = 0.01,
+      ylab="Count Of Sales",
+      xlab="LOG10 of Outlet Sales",
+      geom="freqpoly",
+      color=Outlet_Size)+
+  geom_bar(color="green")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  scale_x_continuous(limits=c(1.5,4.5),breaks=seq(1.5,4.5,0.5))+
+  scale_y_continuous(limits=c(0,40),breaks=seq(0,40,10))+
+  scale_x_log10()
+
+# First Box-Plot
+
+qplot(x=Outlet_Size, y=Item_Outlet_Sales,
+      data = subset(bigMart2, !(Outlet_Size=="")),
+      geom = "boxplot")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))
+
+
+#it is better
+qplot(x=Outlet_Size, y=Item_Outlet_Sales,
+      data = subset(bigMart2, !(Outlet_Size=="")),
+      geom = "boxplot")+
+  theme(axis.text.x = element_text(angle = 90,color="purple"),
+        axis.text.y = element_text(angle = 30,color="tomato"))+
+  coord_cartesian(ylim=c(0,5000))
+
+library(knitr)
+
+by(bigMart2$Item_Outlet_Sales,bigMart2$Outlet_Size,summary)
+
+## Udacity - Explore Two Variables
+
+qplot(x = Item_Weight, y = Item_Visibility,data = bigMart2)
+
+qplot(x = Item_Visibility, y = Item_Outlet_Sales,data = bigMart2)
+
+#More Formal GGPLOT
+
+ggplot(aes(x = Item_Visibility, y = Item_Outlet_Sales), data = bigMart2)+
+  geom_point()
+
+ggplot(aes(x = Item_Visibility, y = Item_Outlet_Sales), data = bigMart2)+
+  geom_point()+
+  xlim(0.0, 0.2)+
+  ylim(0,10000)
+
+ggplot(aes(x = Item_Visibility, y = Item_outlet_Sales_Count), data = bigMart2)+
+  geom_point()+
+  xlim(0.0, 0.2)+
+  ylim(0,50)
+
+ggplot(aes(x = Item_Visibility, y = Item_outlet_Sales_Count), data = bigMart2)+
+  geom_jitter(alpha=1/8)+
+  xlim(0.0, 0.2)+
+  ylim(0,50)
+
+ggplot(aes(x = Item_Visibility, y = Item_outlet_Sales_Count), data = bigMart2)+
+  geom_jitter(alpha=1/8)+
+  xlim(0.0, 0.2)+
+  coord_trans(y="sqrt")
+
+
+ggplot(aes(x = Item_Visibility, y = Item_outlet_Sales_Count), data = bigMart2)+
+  geom_point(alpha=1/8, position = position_jitter(h = 0))+
+  xlim(0.0, 0.2)+
+  coord_trans(y="sqrt")
+
+bigMart2.group_by_Outlet<-
+bigMart2%>%
+  group_by(Outlet_Identifier,
+           Outlet_Establishment_Year,
+           Outlet_Age,
+           Outlet_Location_Type,
+           Outlet_Size,
+           Outlet_Type)%>%
+  summarise(mean_IOS=mean(Item_Outlet_Sales),
+            median_IOS=median(Item_Outlet_Sales),
+            sum_IOS=sum(Item_Outlet_Sales),
+            count_IOS=n())%>%
+  arrange(desc(median_IOS))
+  
+head(bigMart2.group_by_Outlet,15)
+
+#library(knitr)
+#kable(cbind(bigMart2.group_by_Outlet, bigMart2.group_by_Outlet), "html") %>%
+#  kable_styling() %>%
+#  scroll_box(width = "500px", height = "200px")
+
+ggplot(aes(x=Outlet_Age ,y=sum_IOS),data=bigMart2.group_by_Outlet)+
+  geom_point()
+
+ggplot(aes(x=Outlet_Age ,y=sum_IOS),data=bigMart2.group_by_Outlet)+
+  geom_line()
+
+ggplot(aes(x=median_IOS ,y=mean_IOS),data=bigMart2.group_by_Outlet)+
+  geom_line(color="orange",size=1.1)
+
+##it doesn't work in our data
+ggplot(aes(x = Item_Visibility, y = Item_outlet_Sales_Count), data = bigMart2)+
+  geom_point(alpha=1/8, position = position_jitter(h = 0), color = "orange")+
+  xlim(0.0, 0.2)+
+  geom_line(stat="summary",fun.y=sum)+
+  geom_line(stat="summary",fun.y=quantile, probs=.1,
+            linetype=2,color="blue")+
+  geom_line(stat="summary",fun.y=quantile, probs=.9,
+            linetype=2,color="blue")
+
+
+cor(bigMart2$Item_Visibility,bigMart2$Item_Outlet_Sales)
+
+cor(bigMart2$Item_Visibility,bigMart2$Item_outlet_Sales_Count)
+
+cor(bigMart2$Item_Visibility,bigMart2$Item_Weight)
+
+cor(bigMart2$Item_Visibility,bigMart2$Item_outlet_Sales_Count)
+
+cor.test(bigMart2$Item_Visibility,bigMart2$Item_outlet_Sales_Count,method = "pearson")
+
+library("corrplot")
+
+
+M<-cor(
+  bigMart2%>%
+    select(Item_Weight
+           ,Item_Visibility
+           ,Item_MRP
+           ,Item_Outlet_Sales
+           ,Item_Identifier_Num
+           ,Item_outlet_Sales_Count))
+
+corrplot(M,method="number")
+
+corrplot(M,method="circle")
+
+
+ggplot(aes(x = Item_MRP, y = Item_Outlet_Sales), data = bigMart2)+
+  geom_point(alpha=1/8, position = position_jitter(h = 0), color = "orange")+
+  geom_line(stat="summary",fun.y=sum)+
+  geom_line(stat="summary",fun.y=quantile, probs=.1,
+            linetype=2,color="blue")+
+  geom_line(stat="summary",fun.y=quantile, probs=.9,
+            linetype=2,color="blue")
+
+
+
+
+
+```
+
