@@ -5,7 +5,7 @@
 
 ## 4. Step: Try to Understand Data (05.11.2017)
 
-+ [Here](Yetkins/20171105_BigMartSalesData_Udacity) is the some semi-analysis(will be edited).
++ [Here](Yetkins/20171105_BigMartSalesData_Udacity.html) is the some semi-analysis(will be edited).
 
 ## 3. Step: Project Aim and about data (29.10.2017)
 
