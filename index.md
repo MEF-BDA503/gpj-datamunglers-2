@@ -19,4 +19,4 @@
  
  + [Here](files/Data_Munglers_OSYMUTF8.html) is the result of the exploration of university entrance examinations (YGS/LYS) data from 2017.
 
-
++ [Here](files/OSYM2017_v2.html) is the new version of analysis with corrected OSYM 2017 dataset. (07.11.2017)
