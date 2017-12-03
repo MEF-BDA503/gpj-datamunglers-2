@@ -3,9 +3,9 @@
  + __*[Feray Ece Topcu](https://mef-bda503.github.io/pj-ferayece/)*__
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
 
-## 5. Step: TMinimal Working Report (05.11.2017)
+## 5. Step: Minimal Working Report (05.11.2017)
 
-+ [Here](files/20171203_BigMart_Data.html) is the some semi-analysis(will be edited).
++ [Here](files/20171203_BigMart_Data.html) is the minimal working report(will be edited).
 
 ## 4. Step: Try to Understand Data (05.11.2017)
 
