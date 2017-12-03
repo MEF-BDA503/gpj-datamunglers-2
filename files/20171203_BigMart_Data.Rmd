@@ -1,0 +1,726 @@
+
+## <span style="color:grey">__*DataMunglers*__</span>
+  
+## Team Members
+  
+  * *__[Ahmet Yetkin Eser](https://www.linkedin.com/in/ahmet-yetkin-eser-04178a40/)__*
+  
+  * *__[Berkay Soyer](https://www.linkedin.com/in/berkaysoyer/)__*
+  
+  * *__[Feray Ece Top?u]()__*
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+  
+## Our Objective
+
+* The data scientists at BigMart have collected 2013 sales data for 1559 products across 10 stores in different cities. The main objective is to understand whether specific properties of products and/or stores play a significant role in terms of increasing or decreasing sales volume. To achieve this goal, we will build a predictive model and find out the sales of each product at a particular store. This will help BigMart to boost their sales by learning optimised product organization inside stores.
+
+## Data Getting 
+  
+* We take data from [analyticsvidhya.com](https://www.analyticsvidhya.com), Our data is [Big Mart Sales Practise Problem](https://datahack.analyticsvidhya.com/contest/practice-problem-big-mart-sales-iii/) Data, It is open comppetition now and its final date is 31 Dec 2017. We downloaded training and test dataset as a csv file. 
+
+## About BigMart
+
+*  Big Mart is One Stop Shopping center and Free Marketplace. Buy, sell and advertise without fee or at low cost. Find more information about BigMart [Here](http://www.bigmart.com/about-us.html). 
+
+## Get Used to Big Mart Sales Data
+
+ * In this work we try to understand data better.
+ * sources:
+    * [Udacity Data Analysis with R](https://classroom.udacity.com/courses/ud651) Lesson 3 and 5
+    * [DataCamp - Cleaning Data with R](https://www.datacamp.com/courses/cleaning-data-in-r)
+    * [R Project-An Introduction to corrplot Package](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)
+
+
+###1.Exploring The BigMart Dataset
+
+* Call Libraries and Read Data from File
+```{r message=FALSE,warning=FALSE}
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(corrplot)
+
+setwd("/Users/yetkineser/Desktop/mef R/data")
+train <- read.csv('bigMartTrain.csv')
+test  <- read.csv('bigMartTest.csv')
+
+```
+
+* View the structere of train with __*glimpse*__ function
+
+```{r}
+
+glimpse(train)
+
+```
+
+* Our dataset has 12 columns and 8523 rows
+Look at all columns, Firstly factor type columns
+
+  * *__Item_Identifier__* : Unique Product ID
+  
+```{r}
+
+train %>%
+  summarise(n_distinct(Item_Identifier))
+  
+```
+
+  * *__Item_Fat_Content__* : Whether the product is low fat or not
+
+```{r}
+  
+train %>%
+  group_by(Item_Fat_Content) %>%
+  summarise(Count = n(),Perc=round(n()/nrow(.)*100,2)) %>%
+  arrange(desc(Count))
+  
+```
+  
+  * *__Item_Type__* : The category to which the product belongs
+
+```{r}
+  
+train%>%
+  group_by(Item_Type) %>% 
+  summarise(Count = n(), Perc = round(n() / nrow(.) * 100, 2)) %>%
+  arrange(desc(Count))
+
+```
+  
+  * *__Outlet_Identifier__* : Unique Store ID
+
+```{r}
+  
+train %>%
+  group_by(Outlet_Identifier) %>%
+  summarise(Count = n(), Perc = round(n() / nrow(.) * 100, 2)) %>%
+  arrange(desc(Count))
+
+```
+  
+  * *__Outlet_Size__* : The size of the store in terms of ground area covered
+
+```{r}
+
+train%>%
+  group_by(Outlet_Size) %>%
+  summarise(Count = n(),Perc = round(n() / nrow(.) * 100, 2)) %>%
+  arrange(desc(Count))
+
+```
+
+  * *__Outlet_Location_Type__* : The type of city in which the store is located
+
+```{r}
+  
+train%>%
+  group_by(Outlet_Location_Type) %>%
+  summarise(Count = n(),Perc = round(n()/nrow(.) * 100, 2)) %>%
+  arrange(desc(Count))
+
+```
+  
+  * *__Outlet_Type__* : Whether the outlet is just a grocery store or some sort of supermarket
+
+```{r}
+  
+train%>%
+  group_by(Outlet_Type)%>%
+  summarise(Count=n(),Perc=round(n()/nrow(.)*100,2))%>%
+  arrange(desc(Count))
+
+```
+    
+  * *__Item_Weight__* : Weight of product
+
+```{r}
+  
+train%>%
+    summarise(is_NULL=sum(is.na(Item_Weight)==1),
+              is_NOT_NULL=sum(!is.na(Item_Weight)==1)
+              )
+  
+train%>%
+  filter(!is.na(Item_Weight))%>%
+  summarise(
+    Max=max(Item_Weight),
+    Min=min(Item_Weight),
+    Mean=mean(Item_Weight),
+    Median=median(Item_Weight),
+    QUA1=quantile(Item_Weight,1/4),
+    QUA3=quantile(Item_Weight,3/4),
+    IQR=IQR(Item_Weight)
+  )
+  
+```
+    
+  * *__Item_Visibility__* : The % of total display area of all products in a store allocated to the particular product
+
+```{r}
+  
+train%>%
+    summarise(is_NULL=sum(is.na(Item_Visibility)==1),
+              is_NOT_NULL=sum(!is.na(Item_Visibility)==1)
+              )
+  
+train%>%
+  filter(!is.na(Item_Visibility))%>%
+  summarise(
+    Max=max(Item_Visibility),
+    Min=min(Item_Visibility),
+    Mean=mean(Item_Visibility),
+    Median=median(Item_Visibility),
+    QUA1=quantile(Item_Visibility,1/4),
+    QUA3=quantile(Item_Visibility,3/4),
+    IQR=IQR(Item_Visibility)
+  )
+  
+  
+```
+    
+  * *__Item_MRP__* : Maximum Retail Price (list price) of the product
+
+```{r}
+  
+train%>%
+    summarise(is_NULL=sum(is.na(Item_MRP)==1),
+              is_NOT_NULL=sum(!is.na(Item_MRP)==1)
+              )
+  
+train%>%
+  filter(!is.na(Item_MRP))%>%
+  summarise(
+    Max=max(Item_MRP),
+    Min=min(Item_MRP),
+    Mean=mean(Item_MRP),
+    Median=median(Item_MRP),
+    QUA1=quantile(Item_MRP,1/4),
+    QUA3=quantile(Item_MRP,3/4),
+    IQR=IQR(Item_MRP)
+  )
+    
+```
+  
+  * *__Outlet_Establishment_Year__* : The year in which store was established
+
+```{r}
+  
+train%>%
+    summarise(is_NULL=sum(is.na(Outlet_Establishment_Year)==1),
+              is_NOT_NULL=sum(!is.na(Outlet_Establishment_Year)==1)
+              )
+  
+train%>%
+  filter(!is.na(Outlet_Establishment_Year))%>%
+  summarise(
+    Max=max(Outlet_Establishment_Year),
+    Min=min(Outlet_Establishment_Year),
+    Mean=mean(Outlet_Establishment_Year),
+    Median=median(Outlet_Establishment_Year),
+    QUA1=quantile(Outlet_Establishment_Year,1/4),
+    QUA3=quantile(Outlet_Establishment_Year,3/4),
+    IQR=IQR(Outlet_Establishment_Year)
+  )
+  
+```
+    
+  * *__Item_Outlet_Sales__* : Sales of the product in the particulat store. This is the outcome variable to be predicted.
+
+```{r}
+
+train%>%
+    summarise(is_NULL=sum(is.na(Item_Outlet_Sales)==1),
+              is_NOT_NULL=sum(!is.na(Item_Outlet_Sales)==1)
+              )
+  
+train%>%
+  filter(!is.na(Item_Outlet_Sales))%>%
+  summarise(
+    Max=max(Item_Outlet_Sales),
+    Min=min(Item_Outlet_Sales),
+    Mean=mean(Item_Outlet_Sales),
+    Median=median(Item_Outlet_Sales),
+    QUA1=quantile(Item_Outlet_Sales,1/4),
+    QUA3=quantile(Item_Outlet_Sales,3/4),
+    IQR=IQR(Item_Outlet_Sales)
+  )
+  
+  
+```
+
+* Summary =)))
+
+```{r}
+
+summary(train)
+
+```
+
+###2. Data Manipulation 
+
+* Let?s first combine the data sets. This will save our time as we don?t need to write separate codes for train and test data sets. To combine the two data frames, we must make sure that they have equal columns, which is not the case. Test data set has one less column (response variable). Let?s first add the column. We can give this column any value. An intuitive approach would be to extract the mean value of sales from train data set and use it as placeholder for test variable Item _Outlet_ Sales. Anyways, let?s make it simple for now. I?ve taken a value -999. Now, we?ll combine the data sets. (!!!!Change!!!!)
+
+```{r}
+test$Item_Outlet_Sales <- -999
+combi <- rbind(train, test)
+
+```
+
+* Impute missing value by median. We are using median because it is known to be highly robust to outliers. Moreover, for this problem, our evaluation metric is RMSE which is also highly affected by outliers. Hence, median is better in this case. (!!!!Change!!!!)
+
+```{r}
+combi$Item_Weight[is.na(combi$Item_Weight)] <- median(combi$Item_Weight, na.rm = TRUE)
+table(is.na(combi$Item_Weight))
+```
+
+* Let?s take up Item_Visibility. In the graph above, we saw item visibility has zero value also, which is practically not feasible. Hence, we?ll consider it as a missing value and once again make the imputation using median.
+
+```{r}
+combi$Item_Visibility <- ifelse(combi$Item_Visibility == 0,
+                           median(combi$Item_Visibility), combi$Item_Visibility) 
+```
+
+* Let?s proceed to categorical variables now. During exploration, we saw there are mis-matched levels in variables which needs to be corrected.
+Item fat content should be corrected.
+```{r}
+
+combi$Item_Fat_Content <- str_replace(
+           str_replace(
+             str_replace(combi$Item_Fat_Content,"LF","Low Fat")
+             ,"reg","Regular"),"low fat","Low Fat")
+  
+table(combi$Item_Fat_Content)
+
+
+```
+
+
+* We need to mutate new columns for more meaningful data. First, we evaluate Item_Identifier column because We discovered Item_Identifier column has special codes to recognize the type of item when we tried to understand data. So, letters on Item_Identifier column means Food, Drinks and etc. and numbers can be meaningful. We observed first three letters and two letters to control which of them is more meaningful. In any case, we hold both of them as two seperate column to use them later but now, we decided to use first two letters.
+(DR=Drink, FD=Food,NC=Non-Consumable)
+ Secondly, we generate new Outlet_Age column from Outlet_Establishment_Year.
+
+```{r}
+
+##first two and three letter.
+combi <-
+  combi %>%
+  mutate(Item_Identifier_Str3 = substr(Item_Identifier,1,3),  #First three letter of Item_Identifier. 
+         Item_Identifier_Str2 = substr(Item_Identifier,1,2),  #First second letter of Item_Identifier.
+         Item_Identifier_Num=as.numeric(substr(Item_Identifier,4,6)), # Number part of Item_Identifier column.
+         Outlet_Age=2013-Outlet_Establishment_Year, #Outlet Age 
+         PK=row_number())
+
+#table(combi$Item_Identifier_Str3)
+
+table(combi$Item_Identifier_Str2)
+
+
+
+#combi %>% summarise(n_distinct(Item_Identifier_Str3))
+
+```
+
+###3. Data Visualizing
+
+* We should use train data for visualizing data. 
+
+```{r}
+#Split combined data into train and test data again to examine clearly. 
+new_train <- combi %>% 
+  filter(Item_Outlet_Sales != -999)
+
+new_test <- combi %>% 
+  filter(Item_Outlet_Sales == -999)
+#dim(new_train)
+#dim(new_test)
+```
+
+* We manipulated Item_Fat_Content column; so graph it to see new version.
+```{r}
+# Looking at new Item_Fat_Content column.
+qplot(x=Item_Fat_Content,data=new_train)
+
+```
+
+* Looking at Item type and Item Identifier because we observed there is a correlation between these two columns and we manipulated Item_Identifier_Content column as Item_Identifier_Str2 according to Item_Type data. (For example;  if Item_Type = "Soft Drinks", then Item_Identifier_Content starts with 'DR' .) As you can see on second graph group; manipulated Item_Identifier_Str2 column is correct and clear now.
+```{r}
+# Looking at Item Type.
+qplot(x=Item_Type,data=new_train)+
+  geom_bar(color="green")+
+  theme(axis.text = element_text(angle = 0,color="purple"))+
+  coord_flip()
+
+# Looking at Item Type with facet wrap according to Item_Identifier_Str
+qplot(x=Item_Type,data=new_train)+
+  geom_bar(color="green")+
+  theme(axis.text = element_text(color="purple"))+
+  coord_flip()+
+  facet_wrap(~Item_Identifier_Str2,nrow=1)
+```
+
+* Observing the relationship between Item Type/Item Identifier and Outlet_Identifier column to check Item distribution is similar for each Outlet. As we can see, the distribution of items on outlets is very similar. 
+```{r}
+# Looking at Item Type with facet wrap according to Outlet Identifier.
+
+qplot(x = Item_Type, data = new_train) +
+  geom_bar(color = "green") +
+  theme(axis.text = element_text(angle = 0,color = "purple")) +
+  coord_flip() +
+  facet_wrap(~Outlet_Identifier, nrow = 2)
+
+qplot(x = Item_Identifier_Str2, data = new_train) +
+  geom_bar(color = "green") +
+  theme(axis.text = element_text(angle = 0,color = "purple")) +
+  coord_flip() +
+  facet_wrap(~Outlet_Identifier, nrow = 2)
+
+
+```
+
+
+* Observing the histogram of Item Outlet Sales for looking of sales distribution.
+```{r message=FALSE,warning=FALSE}
+# Looking at Item_Outlet_Sales 
+qplot(x = Item_Outlet_Sales, data = new_train, binwidth = 250) +
+  geom_bar(color = "green")+
+  theme(axis.text = element_text(angle = 90,color = "purple")) +
+  scale_x_continuous(limits = c(0, 10000), breaks = seq(0, 10000, 500))
+
+```
+
+* Observing the histogram of Item Outlet Sales with sqrt and log function to like distribution to normal.
+```{r message=FALSE,warning=FALSE}
+# It is better now like normal distibution with sqrt and log10
+qplot(x = sqrt(Item_Outlet_Sales), data = new_train, binwidth = 1,
+      ylab = "Count Of Sales",
+      xlab = "SQRT of Outlet Sales") +
+  geom_bar(color = "green") +
+  theme(axis.text.x = element_text(angle = 90,color = "purple"),
+        axis.text.y = element_text(angle = 30,color = "tomato")) +
+  scale_x_continuous(limits = c(0,100), breaks = seq(0,70,15)) +
+  scale_y_continuous(limits = c(0,200), breaks = seq(0,200,100))
+
+qplot(x = log10(Item_Outlet_Sales+1), data = new_train, binwidth = 0.01,
+      ylab = "Count Of Sales",
+      xlab = "LOG10 of Outlet Sales") +
+  geom_bar(color = "green") +
+  theme(axis.text.x = element_text(angle = 90, color = "purple"),
+        axis.text.y = element_text(angle = 30, color = "tomato")) +
+  scale_x_continuous(limits = c(1.5,4.5), breaks = seq(1.5, 4.5, 0.5)) +
+  scale_y_continuous(limits = c(0,200), breaks = seq(0, 200, 100))
+
+```
+
+
+* Observing the histogram of Item Outlet Sales according to Outlet Identifier to understand disttribution of sales 
+in each shop.
+```{r message=FALSE,warning=FALSE}
+qplot(x = Item_Outlet_Sales, data = new_train,binwidth = 250)+
+  geom_bar(color = "green")+
+  theme(axis.text.x = element_text(angle = 90,color = "purple"),
+        axis.text.y = element_text(angle = 30,color = "tomato")) +
+  scale_x_continuous(limits = c(0, 5000), breaks = seq(0, 5000, 500)) +
+  scale_y_continuous(limits = c(0, 250), breaks = seq(0, 200, 100)) +
+  facet_wrap(~Outlet_Identifier, nrow = 5)
+
+```
+
+
+* Observing the histogram of Item Outlet Sales according to Outlet Size to understand relationship between sales and outlet size.
+```{r message = FALSE, warning = FALSE}
+# Looking at Item_Outlet_Sales according to Outlet_Size
+qplot(x = Item_Outlet_Sales, data = new_train,binwidth = 250) +
+  geom_bar(color = "green") +
+  theme(axis.text.x = element_text(angle = 90, color = "purple"),
+        axis.text.y = element_text(angle = 30, color = "tomato")) +
+  scale_x_continuous(limits = c(0, 5000), breaks = seq(0, 5000, 500)) +
+  scale_y_continuous(limits = c(0, 250), breaks = seq(0, 200, 100)) +
+  facet_wrap(~Outlet_Size, nrow = 4)
+
+by(new_train$Item_Outlet_Sales, new_train$Outlet_Size, summary)
+
+```
+
+
+* We can observe different ways like line plot and box plot.
+```{r message = FALSE, warning = FALSE}
+qplot(x = Item_Outlet_Sales, data = new_train, binwidth = 0.01,
+      ylab = "Count Of Sales",
+      xlab = "Log10 of Outlet Sales",
+      geom = "freqpoly",
+      color = Outlet_Size) +
+  geom_bar(color = "green") +
+  theme(axis.text.x = element_text(angle = 90, color = "purple"),
+        axis.text.y = element_text(angle = 30, color = "tomato")) +
+  scale_x_continuous(limits = c(1.5,4.5), breaks = seq(1.5,4.5,0.5)) +
+  scale_y_continuous(limits = c(0,40), breaks = seq(0,40,10)) +
+  scale_x_log10()
+
+qplot(x = Outlet_Size, y = Item_Outlet_Sales,
+      data = new_train,
+      geom = "boxplot") +
+  theme(axis.text.x = element_text(angle = 90, color = "purple"),
+        axis.text.y = element_text(angle = 30, color = "tomato"))
+
+```
+
+
+
+###3. Prepering Data and Modeling based on kernels
+
+* Note : In this chapter, we used [analyticsvidhya.com kernels](https://www.analyticsvidhya.com/blog/2016/02/complete-tutorial-learn-data-science-scratch/#five)
+
+* Before we start to create new columns, look at our data types.
+
+```{r message = FALSE, warning = FALSE}
+new_combi <- rbind(new_train, new_test)
+
+glimpse(new_combi)
+
+```
+
+
+* First we change our character data to numerical(1,0) data by spread columns
+
+```{r message = FALSE, warning = FALSE}
+new_combi <- rbind(new_train, new_test)
+
+new_combi$Item_Fat_Content <- ifelse(combi$Item_Fat_Content == "Regular",1,0)
+
+library(dummies)
+
+new_combi <- dummy.data.frame(new_combi, names = c('Outlet_Size','Outlet_Location_Type'
+                                            ,'Outlet_Type','Item_Identifier_Str2'),sep = '_')
+
+glimpse(new_combi)
+```
+
+
+* We delete our characters columns before modeling.
+
+```{r message = FALSE, warning = FALSE}
+
+new_combi <- select(new_combi, -c(Item_Identifier, Outlet_Identifier, Item_Fat_Content,                                Outlet_Establishment_Year, Item_Type, Item_Identifier_Str3, PK))
+
+str(new_combi)
+
+```
+
+* We divide our test and train data for modeling.
+
+```{r message = FALSE, warning = FALSE}
+
+pred_train <- new_combi %>% 
+  filter(Item_Outlet_Sales != -999)
+
+pred_test <- new_combi %>% 
+  filter(Item_Outlet_Sales == -999)
+#dim(pred_train)
+#dim(pred_test)
+```
+
+* Linear Regression
+
+```{r message = FALSE, warning = FALSE}
+
+linear_model <- lm(Item_Outlet_Sales ~ ., data = pred_train)
+summary(linear_model)
+```
+
+
+* Look at correlation 
+
+```{r message = FALSE, warning = FALSE}
+
+# cor(pred_train)
+
+
+```
+
+
+* Look at correlation more visual way ([https://cran.r-project.org](https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html)).
+
+```{r message = FALSE, warning = FALSE}
+
+library("corrplot")
+library(RColorBrewer)
+
+M<-cor(pred_train)
+
+corrplot(M, diag = FALSE, order = "FPC",
+         tl.pos = "td", tl.cex = 0.5, method = "circle", type = "upper")
+
+```
+
+
+* Simple model from kernel ([https://www.analyticsvidhya.com](https://www.analyticsvidhya.com/blog/2016/02/complete-tutorial-learn-data-science-scratch/#five)).
+
+```{r message = FALSE, warning = FALSE}
+
+#create a new variable in test file 
+test$Item_Outlet_Sales <- -999
+
+#combine train and test data
+combi <- rbind(train, test)
+
+#impute missing value in Item_Weight
+combi$Item_Weight[is.na(combi$Item_Weight)] <- median(combi$Item_Weight, na.rm = TRUE)
+
+#impute 0 in item_visibility
+combi$Item_Visibility <- ifelse(combi$Item_Visibility == 0, median(combi$Item_Visibility),                         combi$Item_Visibility)
+
+#rename level in Outlet_Size
+levels(combi$Outlet_Size)[1] <- "Other"
+
+#rename levels of Item_Fat_Content
+library(plyr)
+combi$Item_Fat_Content <- revalue(combi$Item_Fat_Content,c("LF" = "Low Fat", "reg" = "Regular"))
+combi$Item_Fat_Content <- revalue(combi$Item_Fat_Content, c("low fat" = "Low Fat"))
+
+#create a new column 2013 - Year
+combi$Year <- 2013 - combi$Outlet_Establishment_Year
+
+#drop variables not required in modeling
+library(dplyr)
+combi <- select(combi, -c(Item_Identifier, Outlet_Identifier, Outlet_Establishment_Year))
+
+#divide data set
+new_train <- combi[1:nrow(train),]
+new_test <- combi[-(1:nrow(train)),]
+
+#linear regression
+linear_model_simple <- lm(Item_Outlet_Sales ~ ., data = new_train)
+summary(linear_model_simple)
+
+```
+
+* Lets Visiulize simple model
+
+```{r message = FALSE, warning = FALSE}
+
+par(mfrow = c(2,2))
+plot(linear_model_simple)
+
+```
+
+
+* Simple model with log function from kernel ([https://www.analyticsvidhya.com](https://www.analyticsvidhya.com/blog/2016/02/complete-tutorial-learn-data-science-scratch/#five)).
+
+```{r message = FALSE, warning = FALSE}
+
+linear_model_log <- lm(log(Item_Outlet_Sales) ~ ., data = new_train)
+summary(linear_model)
+
+par(mfrow = c(2,2))
+plot(linear_model_log)
+
+
+```
+
+
+
+
+* Decision Tree model from kernel ([https://www.analyticsvidhya.com](https://www.analyticsvidhya.com/blog/2016/02/complete-tutorial-learn-data-science-scratch/#five)).
+
+```{r message = FALSE, warning = FALSE}
+library(rpart)
+library(e1071)
+library(rpart.plot)
+library(caret)
+
+#setting the tree control parameters
+fitControl <- trainControl(method = "cv", number = 5)
+cartGrid <- expand.grid(.cp=(1:50)*0.01)
+
+#decision tree
+tree_model <- train(Item_Outlet_Sales ~ ., data = new_train, method = "rpart", trControl = fitControl, tuneGrid = cartGrid)
+#print(tree_model)
+
+main_tree <- rpart(Item_Outlet_Sales ~ ., data = new_train, control = rpart.control(cp=0.01))
+prp(main_tree)
+
+```
+
+
+
+* Compare Kernels Model RMSE, Best model created with Decision Tree Algorithm.
+
+```{r message = FALSE, warning = FALSE}
+
+library(Metrics)
+
+rmse(new_train$Item_Outlet_Sales, linear_model$fitted.values)
+
+rmse(new_train$Item_Outlet_Sales, linear_model_simple$fitted.values)
+
+rmse(new_train$Item_Outlet_Sales, exp(linear_model_log$fitted.values))
+
+pre_score <- predict(main_tree, type = "vector")
+rmse(new_train$Item_Outlet_Sales, pre_score)
+
+```
+
+###4. Creating own models based on datacamp courses
+[statistical-modeling-in-r-part-1](https://www.datacamp.com/courses/statistical-modeling-in-r-part-1)
+
+* Create one lm and one rpart model, find case by case differences between predictions and real sales value and calculate mean.
+
+```{r message = FALSE, warning = FALSE}
+
+lm_model_1 <- lm(Item_Outlet_Sales ~ ., data = new_train)
+rpart_model_1 <- rpart(Item_Outlet_Sales ~ ., data = new_train)
+
+lm_model_1_output <- predict(lm_model_1, newdata = new_train)
+rpart_model_1_output <- predict(rpart_model_1, newdata = new_train)
+
+# Find the case by case differences
+
+lm_model_1_diff <- with(new_train, Item_Outlet_Sales - lm_model_1_output)
+rpart_model_1_diff <- with(new_train, Item_Outlet_Sales - rpart_model_1_output)
+
+# Calculate the mean square errors
+mean(lm_model_1_diff)
+mean(rpart_model_1_diff)
+
+
+```
+
+* Generate a random TRUE or FALSE for each case in new_train. Create one lm and one rpart model with True datasets, Make predictions with FALSE datasets  and find case by case differences between predictions and real sales value and calculate mean for two models.
+
+```{r message = FALSE, warning = FALSE}
+
+(formula <- as.formula(Item_Outlet_Sales ~ Item_Weight + Item_Fat_Content + Item_Visibility + Item_Type + Item_MRP + Outlet_Size + 
+  Outlet_Location_Type + Outlet_Type + Year))
+
+new_train$training_cases <- rnorm(nrow(new_train)) > 0
+
+# summary(new_train$training_cases)
+
+lm_model_1 <- lm(formula, data = subset(new_train, training_cases))
+rpart_model_1 <- rpart(formula, data = subset(new_train, training_cases))
+
+lm_preds <- predict(lm_model_1, newdata = subset(new_train, !training_cases))
+rpart_preds <- predict(rpart_model_1, newdata = subset(new_train, !training_cases))
+
+# Find the mean of case by case differences
+
+with(subset(new_train, !training_cases), mean((Item_Outlet_Sales - lm_preds) ^ 2)) 
+with(subset(new_train, !training_cases), mean((Item_Outlet_Sales - rpart_preds) ^ 2))
+
+
+```
+
+
+
+
+
+
+
+
+
+
