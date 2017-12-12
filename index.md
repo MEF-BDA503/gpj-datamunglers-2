@@ -2,6 +2,12 @@
  + __*[Berkay Soyer](https://mef-bda503.github.io/pj-berkaysoyer/)*__
  + __*[Feray Ece Topcu](https://mef-bda503.github.io/pj-ferayece/)*__
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
+ 
+ 
+## 6. Step: Changes (12.12.2017)
+
++ [Here](files/20171212_BigMart.html) is the minimal working report(will be edited).
+
 
 ## 5. Step: Minimal Working Report (03.12.2017)
 
