@@ -4,22 +4,25 @@
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
  
  
-## 6. Step: Changes (12.12.2017)
+## 7. Step: Report of Term Project (15.12.2017)
++  [Here](files/20171215_BigMart.html) is final report of the term project.
 
-+ [Here](files/20171212_BigMart.html) is the minimal working report(will be edited).
+## 6. Step: Changes on Term Project (12.12.2017)
+
++ [Here](files/20171212_BigMart.html) is working minimal report of the term project.
 
 
-## 5. Step: Minimal Working Report (03.12.2017)
+## 5. Step: Minimal Working Report of Term Project (03.12.2017)
 
 + [Here](files/20171203_BigMart_Data.html) is the minimal working report(will be edited).
 
 ## 4. Step: Try to Understand Data (05.11.2017)
 
-+ [Here](Yetkins/20171105_BigMartSalesData_Udacity.html) is the some semi-analysis(will be edited).
++ [Here](Yetkins/20171105_BigMartSalesData_Udacity.html) is the some semi-analysis of the term project.
 
 ## 3. Step: Project Aim and about data (29.10.2017)
 
-+ [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is the our first proposal.
++ [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is the our first proposal of the term project about BigMart Sales Data.
 
 ## 2. Step: Big Mart Sales Data Detailed Explanation (28.10.2017)
 
