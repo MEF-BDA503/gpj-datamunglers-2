@@ -2,10 +2,10 @@
  + __*[Berkay Soyer](https://mef-bda503.github.io/pj-berkaysoyer/)*__
  + __*[Feray Ece Topcu](https://mef-bda503.github.io/pj-ferayece/)*__
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
- 
+
  
 ## 7. Step: Report of Term Project (15.12.2017)
-+  [Here](files/20171215_BigMart.html) is final report of the term project.
++  [Here](files/20171216_BigMart.html) is final report of the term project.
 
 ## 6. Step: Changes on Term Project (12.12.2017)
 
