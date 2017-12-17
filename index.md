@@ -4,13 +4,12 @@
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
 
  
-## 7. Step: Report of Term Project (15.12.2017)
-+  [Here](files/20171216_BigMart.html) is final report of the term project.
+## 7. Step: The Last Report of Term Project (15.12.2017)
++  [Here](files/20171217_BigMart.html) is final report of the term project.
 
 ## 6. Step: Changes on Term Project (12.12.2017)
 
 + [Here](files/20171212_BigMart.html) is working minimal report of the term project.
-
 
 ## 5. Step: Minimal Working Report of Term Project (03.12.2017)
 
