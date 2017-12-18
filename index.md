@@ -5,7 +5,7 @@
 
  
 ## 7. Step: The Last Report of Term Project (15.12.2017)
-+  [Here](files/20171217_BigMart.html) is final report of the term project.
++  [Here](files/20171218_BigMart_Ece.html) is final report of the term project.
 
 ## 6. Step: Changes on Term Project (12.12.2017)
 
