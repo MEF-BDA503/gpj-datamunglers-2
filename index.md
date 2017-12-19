@@ -4,7 +4,7 @@
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
 
 ## 8. Step: Rmd Presentation (19.12.2017)
-+  [Here](files/20171219_BigMart_Pres_Ece.htm) is presentation of term project.
++  [Here](files/20171219_BigMart_Pres_Ece_2.htm) is presentation of term project.
 
 ## 7. Step: The Last Report of Term Project (15.12.2017)
 +  [Here](files/20171218_BigMart_Ece.html) is final report of the term project.
