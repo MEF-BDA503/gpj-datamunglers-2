@@ -1,0 +1,392 @@
+---
+title: "Big Mart Sales Prediction"
+author: '*__DataMunglers__*'
+date: "19/12/2017"
+output:
+  ioslides_presentation: default
+  beamer_presentation: default
+  slidy_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(dplyr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(corrplot)
+library(dummies)
+library(gridExtra)
+library(rpart)
+library(e1071)
+library(rpart.plot)
+library(caret)
+#setwd("C:/Users/ecetp/Downloads/MEF/BDA 503 - R/Project-BigMart Sales")
+setwd("/Users/yetkineser/Desktop/mef R/data")
+train <- read.csv('bigMartTrain.csv')
+test  <- read.csv('bigMartTest.csv')
+
+test$Item_Outlet_Sales <- -999
+combi <- rbind(train, test)
+combi$Item_Weight[is.na(combi$Item_Weight)] <- median(combi$Item_Weight, na.rm = TRUE)
+table(is.na(combi$Item_Weight))
+combi$Item_Visibility <- ifelse(combi$Item_Visibility == 0,
+                           median(combi$Item_Visibility), combi$Item_Visibility) 
+combi$Item_Fat_Content <- str_replace(
+           str_replace(
+             str_replace(combi$Item_Fat_Content,"LF","Low Fat")
+             ,"reg","Regular"),"low fat","Low Fat")
+
+
+combi <-
+  combi %>%
+  mutate(Item_Identifier_Str3 = substr(Item_Identifier,1,3),  #First three letter of Item_Identifier. 
+         Item_Identifier_Str2 = substr(Item_Identifier,1,2),  #First second letter of Item_Identifier.
+         Item_Identifier_Num=as.numeric(substr(Item_Identifier,4,6)), # Number part of Item_Identifier column.
+         Outlet_Age=2013-Outlet_Establishment_Year, #Outlet Age 
+         PK=row_number())
+new_train <- combi %>% 
+  filter(Item_Outlet_Sales != -999)
+
+new_test <- combi %>% 
+  filter(Item_Outlet_Sales == -999)
+
+new_combi <- rbind(new_train, new_test)
+
+new_combi$Item_Fat_Content <- ifelse(combi$Item_Fat_Content == "Regular",1,0)
+
+library(dummies)
+
+new_combi <- dummy.data.frame(new_combi, names = c('Outlet_Size','Outlet_Location_Type'
+                                            ,'Outlet_Type','Item_Identifier_Str2'),sep = '_')
+
+
+new_combi <- select(new_combi, -c(Item_Identifier, Outlet_Identifier, Item_Fat_Content,Outlet_Establishment_Year, Item_Type, Item_Identifier_Str3, PK))
+
+pred_train <- new_combi %>% 
+  filter(Item_Outlet_Sales != -999)
+
+pred_test <- new_combi %>% 
+  filter(Item_Outlet_Sales == -999)
+
+
+library("corrplot")
+library(RColorBrewer)
+
+M<-cor(pred_train)
+
+new_train <- select(new_train, -c(Item_Identifier, Item_Identifier_Str3, Outlet_Establishment_Year, PK))
+
+set.seed(1)
+n <- nrow(new_train)
+shuffled <- new_train[sample(n),]
+#glimpse(new_train)
+
+#split train data again:
+train_indices <- 1:round(0.7*n)
+test_indices <-  (round(0.7*n)+1):n
+
+splitted_train_simple <- shuffled[train_indices,]
+splitted_test_simple <- shuffled[test_indices,]
+#split train data again:
+train_indices <- 1:round(0.7*n)
+test_indices <-  (round(0.7*n)+1):n
+
+
+splitted_train <- shuffled[train_indices,]
+splitted_test <- shuffled[test_indices,]
+
+set.seed(1)
+n <- nrow(pred_train)
+shuffled <- pred_train[sample(n),]
+#glimpse(new_train)
+
+#split train data again:
+train_indices <- 1:round(0.7*n)
+test_indices <-  (round(0.7*n)+1):n
+
+splitted_train_simple <- shuffled[train_indices,]
+splitted_test_simple <- shuffled[test_indices,]
+#split train data again:
+train_indices <- 1:round(0.7*n)
+test_indices <-  (round(0.7*n)+1):n
+
+
+splitted_train <- shuffled[train_indices,]
+splitted_test <- shuffled[test_indices,]
+
+linear_model_simple <- lm(Item_Outlet_Sales ~ ., data = splitted_train_simple)
+linear_model_sqrt <- lm(sqrt(Item_Outlet_Sales) ~ ., data = splitted_train)
+
+formula_sqrt_tree <- as.formula(sqrt(Item_Outlet_Sales) ~ Item_Weight + 
+                                  Item_Visibility + 
+                                  as.factor(Outlet_Size_High) +
+                                  as.factor(Outlet_Size_Medium) +
+                                  as.factor(Outlet_Size_Small) + 
+                                  as.factor(`Outlet_Location_Type_Tier 1`) +
+                                  as.factor(`Outlet_Location_Type_Tier 2`) +
+                                  as.factor(`Outlet_Location_Type_Tier 3`) +
+                                  as.factor(`Outlet_Type_Supermarket Type3`) +
+                                  as.factor(Item_Identifier_Str2_DR) +
+                                  as.factor(Item_Identifier_Str2_FD) +                                    
+                                  as.factor(Item_Identifier_Str2_NC))
+
+
+
+main_tree <- rpart(formula_sqrt_tree, data = splitted_train, control = rpart.control(cp=0.001))
+
+```
+
+## Summary of Big Mart Dataset
+
+```{r }
+glimpse(train)
+```
+
+## Data Manipulation
+###Reorgonize Item Fat Content Column
+
+```{r train, echo = TRUE}
+train %>%
+  group_by(Item_Fat_Content) %>%
+  summarise(Count = n(),Perc=round(n()/nrow(.)*100,2)) %>%
+  arrange(desc(Count))
+
+```
+
+## Data Manipulation
+### Distribution of Item Fat Content Column After Cleaning
+
+```{r pressure}
+
+qplot(x=Item_Fat_Content,data=new_train) +
+  geom_bar(fill="tomato") +
+  theme_minimal()
+
+```
+
+## Data Manipulation
+### Created Two New Column From Item Identifier
+
+For Example FDA15 to FD and 15
+```{r train, combi, echo = FALSE}
+head(train$Item_Identifier)
+table(combi$Item_Identifier_Str2)
+head(combi$Item_Identifier_Num,20)
+
+```
+Distribution of new string columns and some variables from new numerical column.
+
+## Data Manipulation
+### Looking Item Type Column According to New Column
+```{r new_train}
+
+qplot(x=Item_Type,data=new_train)+
+  geom_bar(fill="tomato")+
+  theme(axis.text = element_text(color="tomato"))+
+  coord_flip() +
+  theme_minimal() +
+  facet_wrap(~Item_Identifier_Str2,nrow=1)
+
+```
+
+## Data Visualization
+### Looking Outlet Identifier Sales According to Outlet Type
+```{r }
+
+p0 <- qplot(x = Outlet_Identifier, y = sqrt(Item_Outlet_Sales), 
+      color = Outlet_Type,
+      ylab = "SQRT of Outlet Sales",
+      data = new_train,
+      geom = "boxplot",
+      fill=Outlet_Type) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 90),
+            axis.text.y = element_text(angle = 30))
+
+p0
+
+```
+
+
+## Data Visualization
+### Item Outlet Sales Distribution
+
+```{r, warning = FALSE }
+
+library(gridExtra)
+
+# Looking at Item_Outlet_Sales 
+p0 <- qplot(x = Item_Outlet_Sales, data = new_train, binwidth = 250,fill=I("lightblue")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme_minimal() +
+  scale_x_continuous(limits = c(0, 10000), breaks = seq(0, 10000, 1000)) 
+  
+# It is better now like normal distibution with sqrt and log10
+p1 <- qplot(x = sqrt(Item_Outlet_Sales), data = new_train, binwidth = 1,
+      ylab = "Count Of Sales",
+      xlab = "SQRT of Outlet Sales",fill=I("tomato")) +
+  theme(axis.text.x = element_text(angle = 90),
+        axis.text.y = element_text(angle = 30)) +
+  theme_minimal() +
+  scale_x_continuous(limits = c(0,100), breaks = seq(0,70,15)) +
+  scale_y_continuous(limits = c(0,200), breaks = seq(0,200,100))
+
+p2 <- qplot(x = log10(Item_Outlet_Sales+1), data = new_train, binwidth = 0.01,
+      ylab = "Count Of Sales",
+      xlab = "LOG10 of Outlet Sales",fill=I("lightblue")) +
+  theme(axis.text.x = element_text(angle = 90),
+        axis.text.y = element_text(angle = 30)) +
+  theme_minimal() +
+  scale_x_continuous(limits = c(1.5,4.5), breaks = seq(1.5, 4.5, 0.5)) +
+  scale_y_continuous(limits = c(0,200), breaks = seq(0, 200, 100))
+
+grid.arrange(p0, p1, p2, ncol=1)
+
+```
+
+## Data Visualization
+### Item Outlet Sales vs Item Type
+
+```{r, warning = FALSE }
+
+# It is better now like normal distibution with sqrt and log10
+p0 <- qplot(x = sqrt(Item_Outlet_Sales), data = new_train, binwidth = 1,
+      ylab = "Sales Distribution",
+      xlab = "SQRT of Outlet Sales",
+      fill=I("tomato")) +
+  theme(axis.text.x = element_text(angle = 90),
+        axis.text.y = element_text(angle = 30)) +
+  theme_minimal() +
+  scale_x_continuous(limits = c(0,100), breaks = seq(0,120,15)) +
+  scale_y_continuous(limits = c(0,40), breaks = seq(0,40,10)) +
+  facet_wrap(~Item_Type)
+
+p1 <- qplot(x = Item_Type, y = sqrt(Item_Outlet_Sales),
+      ylab = "SQRT of Outlet Sales",
+      data = new_train,
+      geom = "boxplot",
+      fill=I("tomato")) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 90),
+            axis.text.y = element_text(angle = 30))
+
+grid.arrange(p0, p1, nrow=1)
+
+```
+
+
+## Data Visualization
+### Looking at Scatter Plots between Numerical Data Columns and Outlet Sales
+
+```{r, warning = FALSE }
+
+p1 <- ggplot(pred_train, aes(x = Item_Weight, y = Item_Outlet_Sales)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE, color='tomato')
+
+p2 <- ggplot(pred_train, aes(x = Item_Visibility, y = Item_Outlet_Sales)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE, color='tomato')
+
+p3 <- ggplot(pred_train, aes(x = Item_MRP, y = Item_Outlet_Sales)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE, color='tomato')
+
+p4 <- ggplot(pred_train, aes(x = Item_Identifier_Num, y = Item_Outlet_Sales)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE, color='tomato')
+
+p5 <- ggplot(pred_train, aes(x = Outlet_Age, y = Item_Outlet_Sales)) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = FALSE, color='tomato')
+
+grid.arrange(p1, p2, p3, p4, p5, ncol=3)
+
+```
+
+## Data Visualization
+### Changing Categorical Columns to Numericals 
+
+```{r, warning = FALSE }
+
+glimpse(pred_train)
+
+```
+
+## Data Visualization
+### Correlation Matrix of Changed Dataset
+
+```{r, warning = FALSE }
+
+corrplot(M, diag = FALSE, order = "FPC",
+         tl.pos = "td", tl.cex = 0.5, method = "circle",type="upper")
+
+```
+
+## Modeling
+### Summary of Sqrt Regression on Bulk Dataset
+
+```{r, warning = FALSE } 
+
+summary(linear_model_simple)
+
+```
+
+## Modeling
+### Formulas of Regressions on Numerical Dataset(p < 0.05)
+
+```{r, warning = FALSE } 
+
+
+(formula_simp <- as.formula(Item_Outlet_Sales ~ Item_MRP + Outlet_Size_ + `Outlet_Type_Grocery Store` + `Outlet_Type_Supermarket Type1` + `Outlet_Type_Supermarket Type2`+ Item_Identifier_Num + Outlet_Age))
+
+(formula_log <- as.formula(log10(Item_Outlet_Sales) ~ Item_MRP + Outlet_Size_ + Outlet_Size_High + `Outlet_Location_Type_Tier 1` + `Outlet_Location_Type_Tier 2` + `Outlet_Type_Grocery Store` + `Outlet_Type_Supermarket Type1` + `Outlet_Type_Supermarket Type2`+ Item_Identifier_Num + Outlet_Age))
+
+(formula_sqrt <- as.formula(sqrt(Item_Outlet_Sales) ~ Item_MRP + Outlet_Size_ + `Outlet_Type_Grocery Store` + `Outlet_Type_Supermarket Type1` + `Outlet_Type_Supermarket Type2`+ Item_Identifier_Num + Outlet_Age))
+
+
+```
+
+
+
+## Modeling
+### Formulas of RMSE(Root Mean Square Error) and MAE(Mean Absolute Error)
+
+```{r, warning = FALSE } 
+library(knitr)
+include_graphics("/Users/yetkineser/Desktop/mae.png")
+
+include_graphics("/Users/yetkineser/Desktop/rmse.png")
+
+"MAE"
+(MAE <- function(actual, predicted){mean(abs(actual - predicted))})
+
+print("RMSE")
+(RMSE <- function(actual, predicted)  {sqrt(mean((actual - predicted)^2))})
+
+```
+
+## Modeling
+### Decision tree of datas which does not use in models 3(p >= 0.05)
+
+```{r, warning = FALSE } 
+
+prp(main_tree)
+
+```
+
+## Modeling
+### Summary of Models
+
+```{r,out.width = "700px", warning = FALSE } 
+
+library(knitr)
+include_graphics("/Users/yetkineser/Desktop/Presentation1.png")
+
+```
+
+
+
+
