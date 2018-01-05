@@ -3,6 +3,13 @@
  + __*[Feray Ece Topcu](https://mef-bda503.github.io/pj-ferayece/)*__
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
 
+## 9. Step: Final Documents of Term Project with Big Mart Sales Data (05.01.2018)
+
++ [Here](files/LastVersion/20180105_BigMart.Rmd) is RMD file of the term project.
++ [Here](files/LastVersion/20180105_BigMart.pdf) is PDF version of the final report of the term project.
++ [Here](files/LastVersion/20180105_BigMart.html) is html version of the final report of the term project.
++ [Here](files/20171219_BigMart_Pres_Ece_2.htm) is presentation of term project.
+
 ## 8. Step: Rmd Presentation (19.12.2017)
 +  [Here](files/20171219_BigMart_Pres_Ece_2.htm) is presentation of term project.
 
@@ -13,15 +20,15 @@
 
 + [Here](files/20171212_BigMart.html) is working minimal report of the term project.
 
-## 5. Step: Minimal Working Report of Term Project (03.12.2017)
+## 5. Step: Minimal Working Report of Term Project with Big Mart Sales Data  (03.12.2017)
 
 + [Here](files/20171203_BigMart_Data.html) is the minimal working report(will be edited).
 
-## 4. Step: Try to Understand Data (05.11.2017)
+## 4. Step: Try to Understand Big Mart Sales Data (05.11.2017)
 
 + [Here](Yetkins/20171105_BigMartSalesData_Udacity.html) is the some semi-analysis of the term project.
 
-## 3. Step: Project Aim and about data (29.10.2017)
+## 3. Step: Big Mart Sales Project Aim and about data (29.10.2017)
 
 + [Here](Yetkins/20171029_bigMartSalesProblemSummary.html) is the our first proposal of the term project about BigMart Sales Data.
 
