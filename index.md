@@ -3,8 +3,8 @@
  + __*[Feray Ece Topcu](https://mef-bda503.github.io/pj-ferayece/)*__
  + __*[Ahmet Yetkin Eser](https://mef-bda503.github.io/pj-esera/)*__
 
-## 9. Step: (Final) Term Project with Big Mart Sales Data (05.01.2018)
-
+## 9. Step: Term Project with Big Mart Sales Data (05.01.2018)
+Final documents of the term project with Big Mart Sales Data can be ordered as follow: 
 + [Here](files/LastVersion/20180105_BigMart.Rmd) is RMD file of the term project.
 + [Here](files/LastVersion/20180105_BigMart.pdf) is PDF version of the final report of the term project.
 + [Here](files/LastVersion/20180105_BigMart.html) is html version of the final report of the term project.
